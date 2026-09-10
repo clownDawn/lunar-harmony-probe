@@ -1,0 +1,52 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>lunar-probe</title>
+</head>
+<body>
+<h1>lunar-probe</h1>
+<pre id="out">boot</pre>
+<script>
+const out = document.getElementById('out');
+function line(s) {
+  out.textContent += '\n' + String(s);
+}
+function scan(tag) {
+  line('--- '+tag+' ---');
+  line('href=' + location.href);
+  line('frame=' + (window===window.top?'top':'child'));
+  const wins = {self:window, parent:window.parent, top:window.top};
+  for (const [wn, w] of Object.entries(wins)) {
+    try {
+      ['app','jsBridge','JsBridge','AiJsBridge','dsBridge','ohos','native'].forEach(n => {
+        try {
+          const o = w[n];
+          line(wn+'.'+n+'='+typeof o+(o&&typeof o==='object'?' keys='+Object.getOwnPropertyNames(o).slice(0,40).join(','):''));
+        } catch(e) { line(wn+'.'+n+' EX '+e); }
+      });
+    } catch(e) { line(wn+' inaccessible '+e); }
+  }
+  const app = (window.app || (window.top&&window.top.app) || {});
+  ['get_user_id','get_app_info','get_app_mobile_request','native_login'].forEach(fn => {
+    try {
+      if (typeof app[fn]==='function') {
+        const r = app[fn]();
+        line('call '+fn+' => '+JSON.stringify(r));
+      } else line(fn+' not fn');
+    } catch(e) { line(fn+' EX '+e); }
+  });
+  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    navigator.mediaDevices.getUserMedia({audio:true}).then(s=>{
+      line('gUM audio OK '+s.getTracks().length);
+      s.getTracks().forEach(t=>t.stop());
+    }).catch(e=>line('gUM audio FAIL '+e.name+':'+e.message));
+  } else line('no gUM');
+}
+scan('t0');
+setTimeout(()=>scan('t1500'), 1500);
+setTimeout(()=>scan('t4000'), 4000);
+</script>
+</body>
+</html>
