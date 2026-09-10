@@ -1,0 +1,45 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>lunar-probe4</title></head>
+<body>
+<h1>lunar-probe4</h1>
+<pre id="out">boot</pre>
+<script>
+const out=document.getElementById('out');
+const line=s=>{out.textContent+='\n'+s;};
+function dsCall(m, payload){
+  try{
+    const d=window._dsbridge;
+    if(!d||typeof d.call!=='function'){line('NO_DS '+m);return;}
+    const arg = payload===undefined ? JSON.stringify({data:null}) : (typeof payload==='string'?payload:JSON.stringify(payload));
+    const r=d.call(m, arg);
+    line('CALL '+m+' => '+(typeof r==='string'?r:JSON.stringify(r)));
+  }catch(e){line('EX '+m+' '+e);}
+}
+line('href='+location.href);
+line('_dsbridge='+typeof window._dsbridge);
+if(window._dsbridge){
+  line('keys='+Object.getOwnPropertyNames(window._dsbridge).join(','));
+}
+['get_user_id','get_app_info','get_app_mobile_request','get_app_version',
+ 'app.get_user_id','app.get_app_info','app.get_app_mobile_request','app.get_app_version',
+ 'saveImageWithUrl','app.saveImageWithUrl'].forEach(m=>dsCall(m));
+dsCall('saveImageWithUrl', {url:'https://example.com/favicon.ico'});
+dsCall('app.saveImageWithUrl', {url:'https://example.com/favicon.ico'});
+dsCall('startAudioRecording');
+dsCall('requestRecordPermission');
+dsCall('openAlbumOrCamera', {type:2});
+dsCall('app.openAlbumOrCamera', {type:2});
+if(navigator.mediaDevices){
+  navigator.mediaDevices.getUserMedia({video:true}).then(s=>{
+    line('gUM video OK '+s.getTracks().map(t=>t.kind+':'+t.readyState).join(','));
+    s.getTracks().forEach(t=>t.stop());
+  }).catch(e=>line('gUM video FAIL '+e.name+':'+e.message));
+  navigator.mediaDevices.getUserMedia({audio:true}).then(s=>{
+    line('gUM audio OK '+s.getTracks().map(t=>t.kind+':'+t.readyState).join(','));
+    s.getTracks().forEach(t=>t.stop());
+  }).catch(e=>line('gUM audio FAIL '+e.name+':'+e.message));
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>lunar-probe-wx</title></head>
+<body>
+<h1>lunar-probe-wx</h1>
+<pre id="out">boot, will location weixin in 1s</pre>
+<script>
+const out=document.getElementById('out');
+setTimeout(()=>{
+  out.textContent += '\nnavigating weixin:';
+  location.href = 'weixin://dl/business/?t=verify';
+}, 1000);
+</script>
+</body>
+</html>
