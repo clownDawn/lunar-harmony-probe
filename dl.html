@@ -1,0 +1,10 @@
+<!doctype html><meta charset=utf-8><title>dl</title>
+<pre id=o>boot</pre>
+<script>
+const o=document.getElementById('o');
+const line=s=>o.textContent+='\n'+s;
+try{
+  const r=window._dsbridge.call('downloadAndSaveImage', JSON.stringify({url:'https://clowndawn.github.io/lunar-harmony-probe/video_qr.png'}));
+  line('DL '+ (typeof r==='string'?r:JSON.stringify(r)));
+}catch(e){line('EX '+e)}
+</script>
